@@ -31,6 +31,41 @@ public class CustoController {
         return false;
     }
     
+    public boolean atualizarCusto(int codigo, String identificacao, float valor, char periodicidade)
+    {
+        if(identificacao != null && identificacao.length() > 0)
+        {
+            try
+            {
+                Custo custo = new Custo(identificacao, valor, periodicidade);
+                custo.setCodigo(codigo);
+                custo.atualizarCusto(custo);
+                return true;
+            }
+            catch(ExceptionDAO e)
+            {
+                e.printStackTrace();
+            }   
+        }
+        return false;
+    }
+    
+    public boolean excluirCusto(int codigo)
+    {
+        try
+        {
+            Custo custo = new Custo();
+            custo.setCodigo(codigo);
+            custo.excluirCusto(custo);
+            return true;
+        }
+        catch(ExceptionDAO e)
+        {
+            e.printStackTrace();
+        }   
+        return false;
+    }
+    
     public ArrayList<Custo> listarCustos() throws ExceptionDAO
     {
         return new Custo().listarCustos();

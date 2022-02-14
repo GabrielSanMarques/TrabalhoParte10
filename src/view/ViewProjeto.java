@@ -6,11 +6,17 @@ package view;
 
 import controller.BeneficioController;
 import controller.ProjetoController;
+import controller.UsuarioController;
+import dao.ExceptionDAO;
 import dao.UsuarioDAO;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+import model.Beneficio;
+import model.Projeto;
 
 /**
  *
@@ -23,7 +29,73 @@ public class ViewProjeto extends javax.swing.JFrame {
      */
     public ViewProjeto() {
         initComponents();
+        gerenciaBotoes(0);
+        refreshTable();
     }
+    
+    private void preencheCampos(String identificacao, String descricao, String cliente, Date data_entrega, int previsao)
+    {
+        SimpleDateFormat formato = new SimpleDateFormat("ddMMyyyy");
+        String data = formato.format(data_entrega);
+        jTextFieldIdentificacao.setText(identificacao);
+        jTextFieldCliente.setText(cliente);
+        jFormattedTextFieldDataEntrega.setText(data);
+        jTextFieldHorasConclusao.setText(String.valueOf(previsao));
+        jTextAreaDescricao.setText(descricao);
+    }
+    
+    private void refreshTable()
+    {
+        DefaultTableModel tableModel = (DefaultTableModel) jTableProjeto.getModel();
+        tableModel.setRowCount(0);
+        ProjetoController projetoController = new ProjetoController();
+        try
+        {
+            
+            ArrayList<Projeto> projetos = projetoController.listarProjetos();
+            projetos.forEach((Projeto projeto) -> {
+                tableModel.addRow(new Object[] {projeto.getCodigo(),
+                                                projeto.getIdentificacao(),
+                                                projeto.getDescricao(),
+                                                projeto.getCliente(),
+                                                projeto.getData_entrega(),
+                                                projeto.getHoras_conclusao(),
+                                                projeto.getValor()
+                });
+            });
+            jTableProjeto.setModel(tableModel);
+        }
+        catch(ExceptionDAO e)
+        {
+            e.printStackTrace();
+        }
+    }
+    
+    private void limparTelaProjeto()
+    {
+        jTextFieldIdentificacao.setText("");
+        jTextFieldCliente.setText("");
+        jFormattedTextFieldDataEntrega.setText("");
+        jTextFieldHorasConclusao.setText("");
+        jTextAreaDescricao.setText("");
+        gerenciaBotoes(0);
+    }
+    
+    private void gerenciaBotoes(int cod)
+    {
+        if(cod == 0)
+        {
+            jButtonCadastrar.setEnabled(true);
+            jButtonGerenciarAlterar.setEnabled(false);
+            jButtonExcluir.setEnabled(false);
+        }
+        else
+        {
+            jButtonCadastrar.setEnabled(false);
+            jButtonGerenciarAlterar.setEnabled(true);
+            jButtonExcluir.setEnabled(true);
+        }
+    } 
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -60,18 +132,43 @@ public class ViewProjeto extends javax.swing.JFrame {
         setResizable(false);
 
         jPanelProjeto.setBackground(new java.awt.Color(0, 0, 0));
+        jPanelProjeto.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jPanelProjetoMouseClicked(evt);
+            }
+        });
 
         jTableProjeto.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null}
             },
             new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
+                "Código", "Identificação", "Descrição", "Cliente", "Data de Entrega", "Horas para conclusão", "Valor"
             }
-        ));
+        ) {
+            Class[] types = new Class [] {
+                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Object.class, java.lang.Integer.class, java.lang.Float.class
+            };
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false, false, false, false
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        jTableProjeto.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jTableProjetoMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(jTableProjeto);
 
         jLabelTituloProjeto.setFont(new java.awt.Font("The Bold Font", 0, 30)); // NOI18N
@@ -278,6 +375,43 @@ public class ViewProjeto extends javax.swing.JFrame {
 
     private void jButtonGerenciarAlterarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonGerenciarAlterarActionPerformed
         // TODO add your handling code here:
+        UsuarioDAO usuariodao = new UsuarioDAO();
+        SimpleDateFormat formato = new SimpleDateFormat("dd/MM/yyyy");
+        Date data_entrega = null;
+        String identificacao = jTextFieldIdentificacao.getText();
+        String descricao = jTextAreaDescricao.getText();
+        String cliente = jTextFieldCliente.getText();
+        int codigo = Integer.parseInt(String.valueOf(jTableProjeto.getValueAt(jTableProjeto.getSelectedRow(), 0)));
+        try
+        {
+            data_entrega = formato.parse(jFormattedTextFieldDataEntrega.getText());
+        }
+        catch(ParseException e)
+        {
+            e.printStackTrace();
+        }
+        int horas_conclusao = Integer.parseInt(jTextFieldHorasConclusao.getText());
+        float valor = usuariodao.getValorHora() * horas_conclusao;
+        boolean sucesso;
+        try
+        {
+            ProjetoController projetoController = new ProjetoController();
+            sucesso = projetoController.atualizarProjeto(codigo, identificacao, descricao, cliente, data_entrega, horas_conclusao, valor);
+            if(sucesso == true)
+            {
+                JOptionPane.showMessageDialog(null, "Atualização realizada com sucesso!");
+                refreshTable();
+                this.limparTelaProjeto();
+            }
+            else
+            {
+                JOptionPane.showMessageDialog(null, "Campos não preenchidos corretamente!");
+            }
+        }
+        catch(Exception ex)
+        {
+            JOptionPane.showMessageDialog(null, "Erro: " + ex);
+        }
     }//GEN-LAST:event_jButtonGerenciarAlterarActionPerformed
 
     private void jButtonCadastrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCadastrarActionPerformed
@@ -300,28 +434,51 @@ public class ViewProjeto extends javax.swing.JFrame {
         float valor = usuariodao.getValorHora() * horas_conclusao;
         boolean sucesso;
         System.out.println(data_entrega);
-        /*try
-        {*/
+        try
+        {
             ProjetoController projetoController = new ProjetoController();
             sucesso = projetoController.cadastrarProjeto(identificacao, descricao, cliente, data_entrega, horas_conclusao, valor);
             if(sucesso == true)
             {
                 JOptionPane.showMessageDialog(null, "Cadastro realizado com sucesso!");
-                //this.limparTelaBeneficio(evt);
+                refreshTable();
+                this.limparTelaProjeto();
             }
             else
             {
                 JOptionPane.showMessageDialog(null, "Campos não preenchidos corretamente!");
             }
-        /*}
+        }
         catch(Exception ex)
         {
             JOptionPane.showMessageDialog(null, "Erro: " + ex);
-        }*/
+        }
     }//GEN-LAST:event_jButtonCadastrarActionPerformed
 
     private void jButtonExcluirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonExcluirActionPerformed
         // TODO add your handling code here:
+        int codigo = Integer.parseInt(String.valueOf(jTableProjeto.getValueAt(jTableProjeto.getSelectedRow(), 0)));
+        boolean sucesso;
+        try
+        {
+            ProjetoController projetoController = new ProjetoController();
+            UsuarioController usuarioController = new UsuarioController();
+            sucesso = projetoController.excluirProjeto(codigo);
+            if(sucesso == true)
+            {
+                JOptionPane.showMessageDialog(null, "Exclusão realizada com sucesso!");
+                refreshTable();
+                this.limparTelaProjeto();
+            }
+            else
+            {
+                JOptionPane.showMessageDialog(null, "Ocorreu um erro!");
+            }
+        }
+        catch(Exception ex)
+        {
+            JOptionPane.showMessageDialog(null, "Erro: " + ex);
+        }
     }//GEN-LAST:event_jButtonExcluirActionPerformed
 
     private void jLabelRetornarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabelRetornarMouseClicked
@@ -330,6 +487,36 @@ public class ViewProjeto extends javax.swing.JFrame {
         viewPrincipal.setVisible(true);
         dispose();
     }//GEN-LAST:event_jLabelRetornarMouseClicked
+
+    private void jTableProjetoMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTableProjetoMouseClicked
+        // TODO add your handling code here:
+        gerenciaBotoes(1);
+        if(evt.getClickCount() == 1)
+        {
+            Date data_entrega = null;
+            SimpleDateFormat formato = new SimpleDateFormat("yyyy-MM-dd");
+            try
+            {
+                data_entrega = formato.parse(String.valueOf(jTableProjeto.getModel().getValueAt(jTableProjeto.getSelectedRow(), 4)));
+                System.out.println(data_entrega);
+            }
+            catch(ParseException e)
+            {
+                e.printStackTrace();
+            }
+            String identificacao = (String)jTableProjeto.getModel().getValueAt(jTableProjeto.getSelectedRow(), 1);
+            String descricao = (String)jTableProjeto.getModel().getValueAt(jTableProjeto.getSelectedRow(), 2);
+            String cliente = (String)jTableProjeto.getModel().getValueAt(jTableProjeto.getSelectedRow(), 3);
+            int horas_conclusao = Integer.parseInt(String.valueOf(jTableProjeto.getModel().getValueAt(jTableProjeto.getSelectedRow(), 5)));
+            preencheCampos(identificacao, descricao, cliente, data_entrega, horas_conclusao);
+        }
+    }//GEN-LAST:event_jTableProjetoMouseClicked
+
+    private void jPanelProjetoMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jPanelProjetoMouseClicked
+        // TODO add your handling code here:
+        jTableProjeto.clearSelection();
+        limparTelaProjeto();
+    }//GEN-LAST:event_jPanelProjetoMouseClicked
 
     /**
      * @param args the command line arguments

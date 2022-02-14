@@ -114,7 +114,7 @@ public class ViewPrincipal extends javax.swing.JFrame {
         jLabelLogadoComo.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         jLabelLogadoComo.setForeground(new java.awt.Color(255, 255, 255));
         jLabelLogadoComo.setText("Logado como:");
-        jLabelLogadoComo.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        jLabelLogadoComo.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
 
         javax.swing.GroupLayout jPanelPrincipalLayout = new javax.swing.GroupLayout(jPanelPrincipal);
         jPanelPrincipal.setLayout(jPanelPrincipalLayout);

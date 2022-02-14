@@ -14,6 +14,7 @@ import java.util.ArrayList;
  */
 public class Custo {
 
+    private int codigo;
     private String identificacao;
     private float valor;
     private char periodicidade;
@@ -68,13 +69,39 @@ public class Custo {
         this.periodicidade = periodicidade;
     }
     
+    /**
+     * @return the codigo
+     */
+    public int getCodigo() {
+        return codigo;
+    }
+
+    /**
+     * @param codigo the codigo to set
+     */
+    public void setCodigo(int codigo) {
+        this.codigo = codigo;
+    }
+    
     public void cadastrarCusto(Custo custo) throws ExceptionDAO
     {
         new CustoDAO().cadastrarCusto(custo);
+    }
+    
+    public void atualizarCusto(Custo custo) throws ExceptionDAO
+    {
+        new CustoDAO().atualizarCusto(custo);
+    }
+    
+    public void excluirCusto(Custo custo) throws ExceptionDAO
+    {
+        new CustoDAO().excluirCusto(custo);
     }
     
     public ArrayList<Custo> listarCustos() throws ExceptionDAO
     {
         return new CustoDAO().listarCustos();
     }
+    
+    
 }

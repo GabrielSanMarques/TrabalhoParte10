@@ -32,6 +32,41 @@ public class BeneficioController {
         return false;
     }
     
+    public boolean atualizarBeneficio(int codigo, String identificacao, float valor, char periodicidade)
+    {
+        if(identificacao != null && identificacao.length() > 0)
+        {
+            try
+            {
+                Beneficio beneficio = new Beneficio(identificacao, valor, periodicidade);
+                beneficio.setCodigo(codigo);
+                beneficio.atualizarBeneficio(beneficio);
+                return true;
+            }
+            catch(ExceptionDAO e)
+            {
+                e.printStackTrace();
+            }   
+        }
+        return false;
+    }
+    
+    public boolean excluirBeneficio(int codigo)
+    {
+        try
+        {
+            Beneficio beneficio = new Beneficio();
+            beneficio.setCodigo(codigo);
+            beneficio.excluirBeneficio(beneficio);
+            return true;
+        }
+        catch(ExceptionDAO e)
+        {
+            e.printStackTrace();
+        }   
+        return false;
+    }
+    
     
     public ArrayList<Beneficio> listarBeneficios() throws ExceptionDAO
     {

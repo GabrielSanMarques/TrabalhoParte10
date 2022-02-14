@@ -25,6 +25,7 @@ public class ViewCusto extends javax.swing.JFrame {
      */
     public ViewCusto() {
         initComponents();
+        gerenciaBotoes(0);
         refreshTable();
     }
 
@@ -58,24 +59,46 @@ public class ViewCusto extends javax.swing.JFrame {
         setResizable(false);
 
         jPanelCusto.setBackground(new java.awt.Color(0, 0, 0));
+        jPanelCusto.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jPanelCustoMouseClicked(evt);
+            }
+        });
 
         jTableCusto.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null}
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
             },
             new String [] {
-                "Identificação", "Periodicidade", "Valor"
+                "Código", "Identificação", "Periodicidade", "Valor"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.Float.class
+                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.Float.class
+            };
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
                 return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        jTableCusto.setFocusable(false);
+        jTableCusto.setRequestFocusEnabled(false);
+        jTableCusto.getTableHeader().setResizingAllowed(false);
+        jTableCusto.getTableHeader().setReorderingAllowed(false);
+        jTableCusto.setVerifyInputWhenFocusTarget(false);
+        jTableCusto.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jTableCustoMouseClicked(evt);
             }
         });
         jScrollPane1.setViewportView(jTableCusto);
@@ -258,14 +281,36 @@ public class ViewCusto extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_jTextFieldValorActionPerformed
 
+    private void preencheCampos(String identificacao, float valor, String periodicidade)
+    {
+        jTextFieldIdentificacao.setText(identificacao);
+        jTextFieldValor.setText(String.valueOf(valor));
+        jComboBoxPeriodicidade.setSelectedItem(periodicidade);
+    }
     
-     private void limparTelaCusto(java.awt.event.ActionEvent evt)
+     private void limparTelaCusto()
     {
         jTextFieldIdentificacao.setText("");
         jTextFieldValor.setText("");
         jComboBoxPeriodicidade.setSelectedItem("Diário");
+        gerenciaBotoes(0);
     }
      
+    private void gerenciaBotoes(int cod)
+    {
+        if(cod == 0)
+        {
+            jButtonCadastrar.setEnabled(true);
+            jButtonGerenciarAlterar.setEnabled(false);
+            jButtonExcluir.setEnabled(false);
+        }
+        else
+        {
+            jButtonCadastrar.setEnabled(false);
+            jButtonGerenciarAlterar.setEnabled(true);
+            jButtonExcluir.setEnabled(true);
+        }
+    }
     private void refreshTable()
     {
         DefaultTableModel tableModel = (DefaultTableModel) jTableCusto.getModel();
@@ -285,7 +330,8 @@ public class ViewCusto extends javax.swing.JFrame {
                     periodicidade = "Mensal";
                 if(custo.getPeriodicidade() == 'a')
                     periodicidade = "Anual";
-                tableModel.addRow(new Object[] {custo.getIdentificacao(),
+                tableModel.addRow(new Object[] {custo.getCodigo(),
+                                                custo.getIdentificacao(),
                                                 periodicidade,
                                                 custo.getValor()
                 });
@@ -316,12 +362,13 @@ public class ViewCusto extends javax.swing.JFrame {
         try
         {
             CustoController custoController = new CustoController();
+            UsuarioController usuarioController = new UsuarioController();
             sucesso = custoController.cadastrarCusto(identificacao, valor, periodicidade);
             if(sucesso == true)
             {
                 JOptionPane.showMessageDialog(null, "Cadastro realizado com sucesso!");
                 refreshTable();
-                this.limparTelaCusto(evt);
+                this.limparTelaCusto();
             }
             else
             {
@@ -336,10 +383,66 @@ public class ViewCusto extends javax.swing.JFrame {
 
     private void jButtonGerenciarAlterarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonGerenciarAlterarActionPerformed
         // TODO add your handling code here:
+        String identificacao = jTextFieldIdentificacao.getText();
+        float valor = Float.parseFloat(jTextFieldValor.getText());
+        int codigo = Integer.parseInt(String.valueOf(jTableCusto.getValueAt(jTableCusto.getSelectedRow(), 0)));
+        char periodicidade = 'd';
+        if(jComboBoxPeriodicidade.getSelectedItem().toString() == "Diário")
+            periodicidade = 'd';
+        if(jComboBoxPeriodicidade.getSelectedItem().toString() == "Semanal")
+            periodicidade = 's';
+        if(jComboBoxPeriodicidade.getSelectedItem().toString() == "Mensal")
+            periodicidade = 'm';
+        if(jComboBoxPeriodicidade.getSelectedItem().toString() == "Anual")
+            periodicidade = 'a';
+        boolean sucesso;
+        try
+        {
+            CustoController custoController = new CustoController();
+            UsuarioController usuarioController = new UsuarioController();
+            sucesso = custoController.atualizarCusto(codigo, identificacao, valor, periodicidade);
+            if(sucesso == true)
+            {
+                JOptionPane.showMessageDialog(null, "Alteração realizada com sucesso!");
+                refreshTable();
+                this.limparTelaCusto();
+            }
+            else
+            {
+                JOptionPane.showMessageDialog(null, "Campos não preenchidos corretamente!");
+            }
+        }
+        catch(Exception ex)
+        {
+            JOptionPane.showMessageDialog(null, "Erro: " + ex);
+        }
     }//GEN-LAST:event_jButtonGerenciarAlterarActionPerformed
 
     private void jButtonExcluirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonExcluirActionPerformed
         // TODO add your handling code here:
+        int codigo = Integer.parseInt(String.valueOf(jTableCusto.getValueAt(jTableCusto.getSelectedRow(), 0)));
+        boolean sucesso;
+        try
+        {
+            CustoController custoController = new CustoController();
+            UsuarioController usuarioController = new UsuarioController();
+            sucesso = custoController.excluirCusto(codigo);
+            if(sucesso == true)
+            {
+                JOptionPane.showMessageDialog(null, "Exclusão realizada com sucesso!");
+                refreshTable();
+                this.limparTelaCusto();
+            }
+            else
+            {
+                JOptionPane.showMessageDialog(null, "Ocorreu um erro!");
+            }
+        }
+        catch(Exception ex)
+        {
+            JOptionPane.showMessageDialog(null, "Erro: " + ex);
+        }
+        
     }//GEN-LAST:event_jButtonExcluirActionPerformed
 
     private void jTextFieldValorKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jTextFieldValorKeyTyped
@@ -357,6 +460,24 @@ public class ViewCusto extends javax.swing.JFrame {
         viewPrincipal.setVisible(true);
         dispose();
     }//GEN-LAST:event_jLabelRetornarMouseClicked
+
+    private void jTableCustoMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTableCustoMouseClicked
+        // TODO add your handling code here:
+        gerenciaBotoes(1);
+        if(evt.getClickCount() == 1)
+        {
+            String identificacao = (String)jTableCusto.getModel().getValueAt(jTableCusto.getSelectedRow(), 1);
+            String periodicidade = (String)jTableCusto.getModel().getValueAt(jTableCusto.getSelectedRow(), 2);
+            Float valor = Float.parseFloat(String.valueOf(jTableCusto.getModel().getValueAt(jTableCusto.getSelectedRow(), 3)));
+            preencheCampos(identificacao, valor, periodicidade);
+        }
+    }//GEN-LAST:event_jTableCustoMouseClicked
+
+    private void jPanelCustoMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jPanelCustoMouseClicked
+        // TODO add your handling code here:
+        jTableCusto.clearSelection();
+        limparTelaCusto();
+    }//GEN-LAST:event_jPanelCustoMouseClicked
 
     /**
      * @param args the command line arguments

@@ -4,9 +4,11 @@
  */
 package model;
 
+import controller.CustoController;
 import dao.ExceptionDAO;
 import dao.UsuarioDAO;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  *
@@ -160,7 +162,28 @@ public class Usuario {
     
     public float calculaValor()
     {
-       return (pretensao_salarial * 12)/((dias_trabalhados.size() * 52 - dias_ferias) * carga_horaria_diaria);
+       int total_custos = 0;
+       try
+       {
+           ArrayList<Custo> custos = new CustoController().listarCustos();
+           Iterator<Custo> iter = custos.iterator();
+           while(iter.hasNext())
+           {
+               if(iter.next().getPeriodicidade() == 'd')
+                total_custos += iter.next().getValor() * 365;
+               else if(iter.next().getPeriodicidade() == 's')
+                total_custos += iter.next().getValor() * 52;
+               else if(iter.next().getPeriodicidade() == 'm')
+                total_custos += iter.next().getValor() * 12;
+               else if(iter.next().getPeriodicidade() == 'a')
+                total_custos += iter.next().getValor() ;
+           }
+       }
+       catch(ExceptionDAO e)
+       {
+           e.printStackTrace();
+       }
+       return (pretensao_salarial * 12 + total_custos)/((dias_trabalhados.size() * 52 - dias_ferias) * carga_horaria_diaria);
     }
     
 }

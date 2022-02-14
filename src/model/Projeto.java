@@ -6,6 +6,7 @@ package model;
 
 import dao.ExceptionDAO;
 import dao.ProjetoDAO;
+import java.util.ArrayList;
 import java.util.Date;
 
 /**
@@ -14,6 +15,7 @@ import java.util.Date;
  */
 public class Projeto {
 
+    private int codigo;
     private String identificacao;
     private String descricao;
     private String cliente;
@@ -21,6 +23,8 @@ public class Projeto {
     private int horas_conclusao;
     private float valor;
 
+    public Projeto(){};
+    
     public Projeto(String identificacao, String descricao, String cliente, Date data_entrega, int horas_conclusao, float valor) {
         this.identificacao = identificacao;
         this.descricao = descricao;
@@ -113,9 +117,32 @@ public class Projeto {
     public void setValor(float valor) {
         this.valor = valor;
     }
+
+    public int getCodigo() {
+        return codigo;
+    }
+
+    public void setCodigo(int codigo) {
+        this.codigo = codigo;
+    }
     
     public void cadastrarProjeto(Projeto projeto) throws ExceptionDAO
     {
         new ProjetoDAO().cadastrarProjeto(projeto);
+    }
+    
+    public void atualizarProjeto(Projeto projeto) throws ExceptionDAO
+    {
+        new ProjetoDAO().atualizarProjeto(projeto);
+    }
+    
+    public void excluirProjeto(Projeto projeto) throws ExceptionDAO
+    {
+        new ProjetoDAO().excluirProjeto(projeto);
+    }
+    
+    public ArrayList<Projeto> listarProjetos() throws ExceptionDAO
+    {
+        return new ProjetoDAO().listarProjetos();
     }
 }

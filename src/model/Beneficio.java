@@ -15,6 +15,7 @@ import java.util.ArrayList;
  */
 public class Beneficio{
 
+    private int codigo;
     private String identificacao;
     private float valor;
     private char periodicidade;
@@ -69,9 +70,33 @@ public class Beneficio{
         this.periodicidade = periodicidade;
     }
     
+    /**
+     * @return the codigo
+     */
+    public int getCodigo() {
+        return codigo;
+    }
+
+    /**
+     * @param codigo the codigo to set
+     */
+    public void setCodigo(int codigo) {
+        this.codigo = codigo;
+    }
+    
     public void cadastrarBeneficio(Beneficio beneficio) throws ExceptionDAO
     {
         new BeneficioDAO().cadastrarBeneficio(beneficio);
+    }
+    
+    public void atualizarBeneficio(Beneficio beneficio) throws ExceptionDAO
+    {
+        new BeneficioDAO().atualizarBeneficio(beneficio);
+    }
+    
+    public void excluirBeneficio(Beneficio beneficio) throws ExceptionDAO
+    {
+        new BeneficioDAO().excluirBeneficio(beneficio);
     }
     
     public ArrayList<Beneficio> listarBeneficios() throws ExceptionDAO

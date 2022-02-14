@@ -6,6 +6,7 @@ package view;
 
 import controller.BeneficioController;
 import controller.CustoController;
+import controller.UsuarioController;
 import dao.ExceptionDAO;
 import java.util.ArrayList;
 import javax.swing.JOptionPane;
@@ -24,7 +25,15 @@ public class ViewBeneficio extends javax.swing.JFrame {
      */
     public ViewBeneficio() {
         initComponents();
+        gerenciaBotoes(0);
         refreshTable();
+    }
+    
+    private void preencheCampos(String identificacao, float valor, String periodicidade)
+    {
+        jTextFieldIdentificacao.setText(identificacao);
+        jTextFieldValor.setText(String.valueOf(valor));
+        jComboBoxPeriodicidade.setSelectedItem(periodicidade);
     }
     
     private void refreshTable()
@@ -46,7 +55,8 @@ public class ViewBeneficio extends javax.swing.JFrame {
                     periodicidade = "Mensal";
                 if(beneficio.getPeriodicidade() == 'a')
                     periodicidade = "Anual";
-                tableModel.addRow(new Object[] {beneficio.getIdentificacao(),
+                tableModel.addRow(new Object[] {beneficio.getCodigo(),
+                                                beneficio.getIdentificacao(),
                                                 periodicidade,
                                                 beneficio.getValor()
                 });
@@ -59,13 +69,30 @@ public class ViewBeneficio extends javax.swing.JFrame {
         }
     }
 
-     private void limparTelaBeneficio(java.awt.event.ActionEvent evt)
+     private void limparTelaBeneficio()
     {
         jTextFieldIdentificacao.setText("");
         jTextFieldValor.setText("");
         jComboBoxPeriodicidade.setSelectedItem("Diário");
+        gerenciaBotoes(0);
     }
     
+    private void gerenciaBotoes(int cod)
+    {
+        if(cod == 0)
+        {
+            jButtonCadastrar.setEnabled(true);
+            jButtonGerenciarAlterar.setEnabled(false);
+            jButtonExcluir.setEnabled(false);
+        }
+        else
+        {
+            jButtonCadastrar.setEnabled(false);
+            jButtonGerenciarAlterar.setEnabled(true);
+            jButtonExcluir.setEnabled(true);
+        }
+    } 
+     
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -96,6 +123,11 @@ public class ViewBeneficio extends javax.swing.JFrame {
         setResizable(false);
 
         jPanelBeneficio.setBackground(new java.awt.Color(0, 0, 0));
+        jPanelBeneficio.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jPanelBeneficioMouseClicked(evt);
+            }
+        });
 
         jLabelTituloBeneficio.setFont(new java.awt.Font("The Bold Font", 0, 30)); // NOI18N
         jLabelTituloBeneficio.setForeground(new java.awt.Color(255, 255, 255));
@@ -123,7 +155,7 @@ public class ViewBeneficio extends javax.swing.JFrame {
 
         jLabelIdentificacao.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         jLabelIdentificacao.setForeground(new java.awt.Color(255, 255, 255));
-        jLabelIdentificacao.setText("Identificação do custo:");
+        jLabelIdentificacao.setText("Identificação do benefício:");
 
         jLabelValor.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         jLabelValor.setForeground(new java.awt.Color(255, 255, 255));
@@ -181,21 +213,33 @@ public class ViewBeneficio extends javax.swing.JFrame {
 
         jTableBeneficio.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null}
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
             },
             new String [] {
-                "Identificação", "Periodicidade", "Valor"
+                "Código", "Identificação", "Periodicidade", "Valor"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.Float.class
+                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.Float.class
+            };
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
                 return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        jTableBeneficio.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jTableBeneficioMouseClicked(evt);
             }
         });
         jScrollPane1.setViewportView(jTableBeneficio);
@@ -318,7 +362,7 @@ public class ViewBeneficio extends javax.swing.JFrame {
             {
                 JOptionPane.showMessageDialog(null, "Cadastro realizado com sucesso!");
                 refreshTable();
-                this.limparTelaBeneficio(evt);
+                this.limparTelaBeneficio();
             }
             else
             {
@@ -333,10 +377,65 @@ public class ViewBeneficio extends javax.swing.JFrame {
 
     private void jButtonGerenciarAlterarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonGerenciarAlterarActionPerformed
         // TODO add your handling code here:
+        String identificacao = jTextFieldIdentificacao.getText();
+        float valor = Float.parseFloat(jTextFieldValor.getText());
+        int codigo = Integer.parseInt(String.valueOf(jTableBeneficio.getValueAt(jTableBeneficio.getSelectedRow(), 0)));
+        char periodicidade = 'd';
+        if(jComboBoxPeriodicidade.getSelectedItem().toString() == "Diário")
+            periodicidade = 'd';
+        if(jComboBoxPeriodicidade.getSelectedItem().toString() == "Semanal")
+            periodicidade = 's';
+        if(jComboBoxPeriodicidade.getSelectedItem().toString() == "Mensal")
+            periodicidade = 'm';
+        if(jComboBoxPeriodicidade.getSelectedItem().toString() == "Anual")
+            periodicidade = 'a';
+        boolean sucesso;
+        try
+        {
+            BeneficioController beneficioController = new BeneficioController();
+            UsuarioController usuarioController = new UsuarioController();
+            sucesso = beneficioController.atualizarBeneficio(codigo, identificacao, valor, periodicidade);
+            if(sucesso == true)
+            {
+                JOptionPane.showMessageDialog(null, "Alteração realizada com sucesso!");
+                refreshTable();
+                this.limparTelaBeneficio();
+            }
+            else
+            {
+                JOptionPane.showMessageDialog(null, "Campos não preenchidos corretamente!");
+            }
+        }
+        catch(Exception ex)
+        {
+            JOptionPane.showMessageDialog(null, "Erro: " + ex);
+        }
     }//GEN-LAST:event_jButtonGerenciarAlterarActionPerformed
 
     private void jButtonExcluirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonExcluirActionPerformed
         // TODO add your handling code here:
+        int codigo = Integer.parseInt(String.valueOf(jTableBeneficio.getValueAt(jTableBeneficio.getSelectedRow(), 0)));
+        boolean sucesso;
+        try
+        {
+            BeneficioController beneficioController = new BeneficioController();
+            UsuarioController usuarioController = new UsuarioController();
+            sucesso = beneficioController.excluirBeneficio(codigo);
+            if(sucesso == true)
+            {
+                JOptionPane.showMessageDialog(null, "Exclusão realizada com sucesso!");
+                refreshTable();
+                this.limparTelaBeneficio();
+            }
+            else
+            {
+                JOptionPane.showMessageDialog(null, "Ocorreu um erro!");
+            }
+        }
+        catch(Exception ex)
+        {
+            JOptionPane.showMessageDialog(null, "Erro: " + ex);
+        }
     }//GEN-LAST:event_jButtonExcluirActionPerformed
 
     private void jTextFieldValorKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jTextFieldValorKeyTyped
@@ -355,6 +454,24 @@ public class ViewBeneficio extends javax.swing.JFrame {
         dispose();
     }//GEN-LAST:event_jLabelRetornarMouseClicked
 
+    private void jTableBeneficioMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTableBeneficioMouseClicked
+        // TODO add your handling code here:
+        gerenciaBotoes(1);
+        if(evt.getClickCount() == 1)
+        {
+            String identificacao = (String)jTableBeneficio.getModel().getValueAt(jTableBeneficio.getSelectedRow(), 1);
+            String periodicidade = (String)jTableBeneficio.getModel().getValueAt(jTableBeneficio.getSelectedRow(), 2);
+            Float valor = Float.parseFloat(String.valueOf(jTableBeneficio.getModel().getValueAt(jTableBeneficio.getSelectedRow(), 3)));
+            preencheCampos(identificacao, valor, periodicidade);
+        }
+    }//GEN-LAST:event_jTableBeneficioMouseClicked
+
+    private void jPanelBeneficioMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jPanelBeneficioMouseClicked
+        // TODO add your handling code here:
+        jTableBeneficio.clearSelection();
+        limparTelaBeneficio();
+    }//GEN-LAST:event_jPanelBeneficioMouseClicked
+                                   
     /**
      * @param args the command line arguments
      */

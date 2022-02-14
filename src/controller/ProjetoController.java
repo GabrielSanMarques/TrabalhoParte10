@@ -5,6 +5,7 @@
 package controller;
 
 import dao.ExceptionDAO;
+import java.util.ArrayList;
 import java.util.Date;
 import model.Projeto;
 
@@ -30,5 +31,45 @@ public class ProjetoController {
             }   
         }
         return false;
+    }
+    
+    public boolean atualizarProjeto(int codigo, String identificacao, String descricao, String cliente, Date data_entrega, int horas_conclusao, float valor)
+    {
+        if(identificacao != null && identificacao.length() > 0)
+        {
+            try
+            {
+                Projeto projeto = new Projeto(identificacao, descricao, cliente, data_entrega, horas_conclusao, valor);
+                projeto.setCodigo(codigo);
+                projeto.atualizarProjeto(projeto);
+                return true;
+            }
+            catch(ExceptionDAO e)
+            {
+                e.printStackTrace();
+            }   
+        }
+        return false;
+    }
+    
+    public boolean excluirProjeto(int codigo)
+    {
+        try
+        {
+            Projeto projeto = new Projeto();
+            projeto.setCodigo(codigo);
+            projeto.excluirProjeto(projeto);
+            return true;
+        }
+        catch(ExceptionDAO e)
+        {
+            e.printStackTrace();
+        }   
+        return false;
+    }
+    
+    public ArrayList<Projeto> listarProjetos() throws ExceptionDAO
+    {
+        return new Projeto().listarProjetos();
     }
 }
