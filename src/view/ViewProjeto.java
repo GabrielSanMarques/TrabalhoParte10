@@ -106,6 +106,7 @@ public class ViewProjeto extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jLabelSubtituloProjeto1 = new javax.swing.JLabel();
         jPanelProjeto = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTableProjeto = new javax.swing.JTable();
@@ -126,6 +127,10 @@ public class ViewProjeto extends javax.swing.JFrame {
         jButtonGerenciarAlterar = new javax.swing.JButton();
         jButtonCadastrar = new javax.swing.JButton();
         jButtonExcluir = new javax.swing.JButton();
+
+        jLabelSubtituloProjeto1.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        jLabelSubtituloProjeto1.setForeground(new java.awt.Color(255, 255, 255));
+        jLabelSubtituloProjeto1.setText("Selecione uma funcionalidade.");
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Free! - Gerenciar Projetos");
@@ -177,7 +182,7 @@ public class ViewProjeto extends javax.swing.JFrame {
 
         jLabelSubtituloProjeto.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         jLabelSubtituloProjeto.setForeground(new java.awt.Color(255, 255, 255));
-        jLabelSubtituloProjeto.setText("Selecione uma funcionalidade.");
+        jLabelSubtituloProjeto.setText("Organização é a chave do sucesso.");
 
         jLabelIdentificacao.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         jLabelIdentificacao.setForeground(new java.awt.Color(255, 255, 255));
@@ -565,6 +570,7 @@ public class ViewProjeto extends javax.swing.JFrame {
     private javax.swing.JLabel jLabelIdentificacao;
     private javax.swing.JLabel jLabelRetornar;
     private javax.swing.JLabel jLabelSubtituloProjeto;
+    private javax.swing.JLabel jLabelSubtituloProjeto1;
     private javax.swing.JLabel jLabelTituloProjeto;
     private javax.swing.JPanel jPanelProjeto;
     private javax.swing.JScrollPane jScrollPane1;

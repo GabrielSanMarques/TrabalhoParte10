@@ -16,6 +16,7 @@ import java.util.Iterator;
  */
 public class Usuario {
     
+    private int codigo;
     private String nome;
     private String email;
     private String senha;
@@ -148,6 +149,14 @@ public class Usuario {
      */
     public void setPretensao_salarial(float pretensao_salarial) {
         this.pretensao_salarial = pretensao_salarial;
+    }
+    
+    public int getCodigo() {
+        return codigo;
+    }
+
+    public void setCodigo(int codigo) {
+        this.codigo = codigo;
     }
     
     public void cadastrarUsuario(Usuario usuario) throws ExceptionDAO   
